@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#075e54">
+<meta name="description" content="বাংলাদেশের সংশোধিত বাংলা বর্ষপঞ্জি, ইংরেজি ও হিজরি তারিখ দেখার সহজ ও নির্ভুল ওয়েবসাইট।">
+<title>বাংলা ক্যালেন্ডার | নির্ভুল বাংলা তারিখ</title>
+<style>
+:root{--green:#075e54;--mint:#e8f5f1;--ink:#17332f;--muted:#637873;--line:#dce8e4;--paper:#fff}
+*{box-sizing:border-box}body{margin:0;background:#f3f8f6;color:var(--ink);font-family:system-ui,"Noto Sans Bengali",sans-serif}
+header{background:linear-gradient(135deg,#075e54,#13836e);color:white;padding:25px 16px 30px;text-align:center}
+header h1{margin:0;font-size:clamp(25px,5vw,36px)}header p{margin:8px 0 0;color:#d8f1e9}
+main{max-width:900px;margin:20px auto;padding:0 14px 35px}
+.today{background:white;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 5px 20px #17332f0c}
+.today h2{font-size:18px;margin:0 0 12px;color:var(--green)}
+.date-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.date-card{background:var(--mint);padding:13px 10px;border-radius:13px;text-align:center}
+.date-card small{display:block;color:var(--muted);font-size:13px}.date-card strong{display:block;font-size:clamp(16px,3vw,21px);margin-top:5px}
+.calendar{margin-top:16px;background:white;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 5px 20px #17332f0c}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+.toolbar button{border:0;background:var(--mint);color:var(--green);font-size:20px;border-radius:10px;width:42px;height:40px;cursor:pointer}
+.month-title{text-align:center;flex:1}.month-title strong{display:block;font-size:21px}.month-title small{color:var(--muted)}
+.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.week div{text-align:center;padding:8px 0;color:var(--muted);font-size:13px}
+.day{min-height:68px;border:1px solid var(--line);border-radius:10px;padding:6px 3px;text-align:center;background:#fff}
+.day.empty{border:0;background:transparent}.day.today{border:2px solid var(--green);background:var(--mint)}
+.day .bn{display:block;font-size:20px;font-weight:700}.day .en{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.day .hijri{display:block;font-size:10px;color:#8a6a2c;margin-top:2px}
+.note{color:var(--muted);font-size:12px;line-height:1.6;margin:13px 2px 0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:12px}
+@media(max-width:520px){main{padding:0 9px 25px}.today,.calendar{padding:12px}.date-cards{gap:6px}.date-card{padding:10px 4px}.day{min-height:59px;padding:5px 1px}.day .bn{font-size:17px}.day .en{font-size:11px}.day .hijri{font-size:9px}.week{gap:3px}.days{gap:3px}}
+</style>
+</head>
+<body>
+<header><h1>বাংলা ক্যালেন্ডার</h1><p>বাংলা • ইংরেজি • আরবি (হিজরি)</p></header>
+<main>
+<section class="today">
+<h2>আজকের তারিখ</h2>
+<div class="date-cards">
+<div class="date-card"><small>বাংলা তারিখ</small><strong id="todayBangla">—</strong></div>
+<div class="date-card"><small>ইংরেজি তারিখ</small><strong id="todayEnglish">—</strong></div>
+<div class="date-card"><small>আরবি / হিজরি</small><strong id="todayHijri">—</strong></div>
+</div>
+</section>
+<section class="calendar">
+<div class="toolbar">
+<button id="prev" aria-label="আগের মাস">‹</button>
+<div class="month-title"><strong id="monthName">—</strong><small id="yearName">—</small></div>
+<button id="next" aria-label="পরের মাস">›</button>
+</div>
+<div class="week" id="week"></div>
+<div class="days" id="days"></div>
+<p class="note">নোট: বাংলা তারিখ বাংলাদেশের সংশোধিত বাংলা বর্ষপঞ্জি অনুযায়ী হিসাব করা হয়। হিজরি তারিখ উম্মুল কুরা ক্যালেন্ডারের ভিত্তিতে দেখানো হয়; বাংলাদেশে চাঁদ দেখার স্থানীয় ঘোষণায় ১ দিন পার্থক্য হতে পারে।</p>
+</section>
+</main>
+<footer>বাংলা ক্যালেন্ডার • বিনামূল্যের ওয়েব ক্যালেন্ডার</footer>
+<script>
+const bnMonths=['বৈশাখ','জ্যৈষ্ঠ','আষাঢ়','শ্রাবণ','ভাদ্র','আশ্বিন','কার্তিক','অগ্রহায়ণ','পৌষ','মাঘ','ফাল্গুন','চৈত্র'];
+const bnDigits = n => String(n).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[+d]);
+const weekNames=['রবি','সোম','মঙ্গল','বুধ','বৃহস্পতি','শুক্র','শনি'];
+
+// ফাংশন: গ্রেগরিয়ান বছর থেকে বাংলা অধিবর্ষ (লিপ ইয়ার) বের করা
+// বাংলা বর্ষপঞ্জিতে ২০২০ সালের পর থেকে গ্রেগরিয়ান লিপ ইয়ারের ঠিক পরের বছর ফাল্গুন ৩০ দিন হয়ে থাকে।
+function isBengaliLeapYear(gy) {
+  const isGregLeap = new Date(Date.UTC(gy, 1, 29)).getUTCDate() === 29;
+  return isGregLeap; 
+}
+
+// মাসের দৈর্ঘ্য নির্ধারণ
+function getMonthLength(bnYear, m) {
+  const gy = bnYear + 593; 
+  if (m === 10) { // ফাল্গুন
+    // বাংলা বছরের শুরুর গ্রেগরিয়ান বছর ও পরের বছর মিলিয়ে লিপ ইয়ার চেক
+    return isBengaliLeapYear(gy) || isBengaliLeapYear(gy + 1) ? 30 : 29;
+  }
+  return [31,31,31,31,31,30,30,30,30,30,0,30][m];
+}
+
+// গ্রেগরিয়ান থেকে বাংলা তারিখ বের করার লজিক
+function banglaInfo(date) {
+  const y = date.getUTCFullYear(), m = date.getUTCMonth(), d = date.getUTCDate();
+  const thisYearStart = Date.UTC(y, 3, 14); // ১৪ এপ্রিল
+  let start, year;
+  
+  if (date.getTime() >= thisYearStart) {
+    start = new Date(thisYearStart);
+    year = y - 593;
+  } else {
+    start = new Date(Date.UTC(y - 1, 3, 14));
+    year = y - 594;
+  }
+  
+  let offset = Math.round((date - start) / 86400000);
+  let mi = 0;
+  while (mi < 11 && offset >= getMonthLength(year, mi)) {
+    offset -= getMonthLength(year, mi);
+    mi++;
+  }
+  return { day: offset + 1, month: mi, year: year };
+}
+
+// বাংলা থেকে গ্রেগরিয়ান তারিখ বের করার লজিক
+function banglaToDate(bnYear, month, day) {
+  // ভুল ইনপুট যাচাই
+  if(month < 0 || month > 11 || day < 1 || day > getMonthLength(bnYear, month)) {
+      return null;
+  }
+  const gy = bnYear + 593;
+  let offset = 0;
+  for (let i = 0; i < month; i++) {
+    offset += getMonthLength(bnYear, i);
+  }
+  offset += (day - 1);
+  return new Date(Date.UTC(gy, 3, 14) + offset * 86400000);
+}
+
+function hijri(date) {
+  try { return new Intl.DateTimeFormat('bn-BD-u-ca-islamic-umalqura', {day:'numeric',month:'short',year:'numeric'}).format(date); }
+  catch(e) { 
+    try { return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', {day:'numeric',month:'short',year:'numeric'}).format(date); } 
+    catch(err) { return '—'; }
+  }
+}
+
+// লোকাল টাইমজোন সমস্যা এড়াতে UTC-তে দুপুর ১২টা সেট করা হচ্ছে
+const today = new Date();
+const todayUTC = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), 12));
+const todayBn = banglaInfo(todayUTC);
+
+function showToday() {
+  document.getElementById('todayBangla').textContent = `${bnDigits(todayBn.day)} ${bnMonths[todayBn.month]} ${bnDigits(todayBn.year)}`;
+  document.getElementById('todayEnglish').textContent = new Intl.DateTimeFormat('bn-BD', {day:'numeric',month:'long',year:'numeric'}).format(today);
+  document.getElementById('todayHijri').textContent = hijri(today);
+}
+
+let viewMonth = todayBn.month;
+let viewYear = todayBn.year;
+
+function render() {
+  document.getElementById('monthName').textContent = bnMonths[viewMonth];
+  document.getElementById('yearName').textContent = `বাংলা ${bnDigits(viewYear)} সাল`;
+  document.getElementById('week').innerHTML = weekNames.map(x => `<div>${x}</div>`).join('');
+  
+  const firstDate = banglaToDate(viewYear, viewMonth, 1);
+  const startDay = firstDate.getUTCDay();
+  const count = getMonthLength(viewYear, viewMonth);
+  
+  let html = '';
+  for (let i = 0; i < startDay; i++) {
+    html += '<div class="day empty"></div>';
+  }
+  
+  for (let d = 1; d <= count; d++) {
+    const dt = banglaToDate(viewYear, viewMonth, d);
+    const isToday = dt.toISOString().slice(0, 10) === todayUTC.toISOString().slice(0, 10);
+    
+    // ইংরেজি তারিখ
+    const enDate = new Intl.DateTimeFormat('en-GB', {day:'numeric',month:'short'}).format(dt);
+    // হিজরি তারিখ (বাংলা সংখ্যায়)
+    const hjDate = hijri(dt);
+    
+    html += `<div class="day ${isToday ? 'today' : ''}">
+      <span class="bn">${bnDigits(d)}</span>
+      <span class="en">${enDate}</span>
+      <span class="hijri">${hjDate}</span>
+    </div>`;
+  }
+  document.getElementById('days').innerHTML = html;
+}
+
+function move(delta) {
+  viewMonth += delta;
+  if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+  if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+  render();
+}
+
+document.getElementById('prev').addEventListener('click', () => move(-1));
+document.getElementById('next').addEventListener('click', () => move(1));
+
+showToday();
+render();
+</script>
+</body></html>
